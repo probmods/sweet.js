@@ -30,9 +30,7 @@
         var resolveSync = require('resolve/lib/sync');
         var codegen     = require('escodegen');
 
-        var lib  = path.join(path.dirname(fs.realpathSync(__filename)), "../macros");
-
-        var stxcaseModule = fs.readFileSync(lib + "/stxcase.js", 'utf8');
+        var stxcaseModule = fs.readFileSync(__dirname + "/../macros/stxcase.js", 'utf8');
 
         var moduleCache = {};
         var cwd = process.cwd();
@@ -60,11 +58,13 @@
                 resolveSync,
                 requireModule);
 
-        // Alow require('./example') for an example.sjs file.
-        require.extensions['.sjs'] = function(module, filename) {
-            var content = require('fs').readFileSync(filename, 'utf8');
-            module._compile(codegen.generate(exports.parse(content, exports.loadedMacros)), filename);
-        };
+        if (require.extensions) {
+          // Alow require('./example') for an example.sjs file.
+          require.extensions['.sjs'] = function(module, filename) {
+              var content = require('fs').readFileSync(filename, 'utf8');
+              module._compile(codegen.generate(exports.parse(content, exports.loadedMacros)), filename);
+          };
+        }
     } else if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define(['exports',
